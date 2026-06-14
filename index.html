@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>歴史〇×クイズ</title>
+  <meta name="application-name" content="歴史〇×クイズ" />
+  <meta name="apple-mobile-web-app-title" content="歴史〇×クイズ" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#12223f" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="apple-touch-icon.png" />
+  <style>
+    :root {
+      --bg0: #0b1327;
+      --bg1: #12223f;
+      --panel: rgba(255, 255, 255, 0.94);
+      --panel2: rgba(255, 255, 255, 0.82);
+      --ink: #172033;
+      --muted: #657086;
+      --line: rgba(23, 32, 51, 0.12);
+      --gold: #d8aa45;
+      --blue: #2867d9;
+      --red: #d73d4a;
+      --green: #1c9b70;
+      --shadow: 0 18px 55px rgba(0, 0, 0, 0.26);
+      --radius: 24px;
+      --safeTop: env(safe-area-inset-top, 0px);
+      --safeBottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family:
+        -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+        "Yu Gothic", "YuGothic", "Noto Sans JP", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(216, 170, 69, 0.28), transparent 34%),
+        radial-gradient(circle at 88% 12%, rgba(40, 103, 217, 0.34), transparent 31%),
+        linear-gradient(145deg, var(--bg0), var(--bg1));
+      touch-action: manipulation;
+      user-select: none;
+    }
+
+    button, input, label {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(100vw, 820px);
+      height: 100dvh;
+      min-height: 520px;
+      margin: 0 auto;
+      padding: calc(12px + var(--safeTop)) 12px calc(12px + var(--safeBottom));
+      display: grid;
+      place-items: stretch;
+      position: relative;
+    }
+
+    .phone {
+      position: relative;
+      height: 100%;
+      border-radius: 32px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06)),
+        rgba(255, 255, 255, 0.05);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(12px);
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      padding: 18px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      animation: fadeIn 0.18s ease-out;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .topbar {
+      height: 48px;
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: #fff;
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    .brand-title {
+      font-weight: 900;
+      font-size: clamp(20px, 5.2vw, 29px);
+      letter-spacing: 0.03em;
+      line-height: 1.05;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    .brand-sub {
+      margin-top: 4px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.75);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .icon-btn, .small-btn {
+      border-radius: 999px;
+      padding: 10px 13px;
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      font-weight: 800;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+    }
+
+    .icon-btn:active, .small-btn:active, .primary:active, .secondary:active, .mode-card:active, .answer-btn:active {
+      transform: scale(0.98);
+    }
+
+    .hero {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      gap: 12px;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .panel {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 16px 42px rgba(0, 0, 0, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+    }
+
+    .home-card {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 14px;
+      text-align: center;
+    }
+
+    .home-mark {
+      width: min(42vw, 190px);
+      aspect-ratio: 1;
+      margin: 0 auto 4px;
+      border-radius: 40px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.9), transparent 26%),
+        linear-gradient(145deg, #f8f2e2, #e3c77d);
+      box-shadow: inset 0 -10px 25px rgba(99, 64, 10, 0.18), 0 16px 36px rgba(0, 0, 0, 0.18);
+      color: #12223f;
+      font-size: clamp(48px, 18vw, 92px);
+      font-weight: 950;
+      letter-spacing: -0.12em;
+      padding-right: 0.12em;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(13px, 3.8vw, 16px);
+      line-height: 1.55;
+    }
+
+    .actions {
+      display: grid;
+      gap: 10px;
+      flex: 0 0 auto;
+    }
+
+    .primary, .secondary, .danger {
+      width: 100%;
+      border-radius: 18px;
+      min-height: 52px;
+      padding: 13px 16px;
+      font-weight: 900;
+      letter-spacing: 0.03em;
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
+    }
+
+    .primary {
+      background: linear-gradient(135deg, #f4c96a, #d8aa45);
+      color: #162039;
+    }
+
+    .secondary {
+      background: rgba(255, 255, 255, 0.88);
+      color: var(--ink);
+      border: 1px solid rgba(23, 32, 51, 0.12);
+    }
+
+    .danger {
+      background: #fff1f2;
+      color: #b42333;
+      border: 1px solid rgba(215, 61, 74, 0.28);
+      box-shadow: none;
+    }
+
+    .mini-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .file-label {
+      display: grid;
+      place-items: center;
+      min-height: 48px;
+      border-radius: 16px;
+      font-weight: 900;
+      background: rgba(255, 255, 255, 0.18);
+      color: #fff;
+      border: 1px dashed rgba(255, 255, 255, 0.32);
+    }
+
+    .file-label input {
+      display: none;
+    }
+
+    .setup-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field span {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .number-row {
+      display: grid;
+      grid-template-columns: 46px 1fr 46px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .round-mini {
+      height: 46px;
+      border-radius: 15px;
+      background: #eef2f8;
+      font-weight: 950;
+      font-size: 24px;
+      color: #26324b;
+    }
+
+    input[type="number"] {
+      height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      text-align: center;
+      font-weight: 900;
+      font-size: 21px;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+    }
+
+    .mode-grid {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .mode-card {
+      min-height: 66px;
+      padding: 12px;
+      border-radius: 18px;
+      background: #fff;
+      border: 2px solid transparent;
+      text-align: left;
+      display: grid;
+      gap: 3px;
+      color: var(--ink);
+      box-shadow: 0 8px 18px rgba(23, 32, 51, 0.08);
+    }
+
+    .mode-card.selected {
+      border-color: var(--gold);
+      background: #fff9e9;
+    }
+
+    .mode-card strong {
+      font-size: 15px;
+    }
+
+    .mode-card small {
+      font-size: 11px;
+      line-height: 1.3;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .quiz-screen {
+      gap: 10px;
+    }
+
+    .quiz-stage {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 10px;
+    }
+
+    .quiz-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: #fff;
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .bar {
+      height: 10px;
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .bar > i {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #f4c96a, #fff2b6);
+      transition: width 0.22s ease;
+    }
+
+    .question-card {
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(18px, 5vw, 34px);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .question-card::before {
+      content: "";
+      position: absolute;
+      inset: 14px;
+      border-radius: 22px;
+      border: 1px solid rgba(216, 170, 69, 0.35);
+      pointer-events: none;
+    }
+
+    .question-text {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      font-size: clamp(22px, 6vw, 34px);
+      line-height: 1.45;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+    }
+
+    .question-text.long {
+      font-size: clamp(18px, 4.8vw, 27px);
+      line-height: 1.42;
+    }
+
+    .question-text.very-long {
+      font-size: clamp(16px, 4.1vw, 23px);
+      line-height: 1.38;
+    }
+
+    .feedback {
+      min-height: 54px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.18);
+      color: #fff;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(4px);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .feedback.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .feedback strong {
+      font-size: 18px;
+    }
+
+    .feedback small {
+      display: block;
+      margin-top: 2px;
+      opacity: 0.78;
+      font-weight: 700;
+    }
+
+    .feedback button {
+      flex: 0 0 auto;
+      min-width: 88px;
+      min-height: 38px;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .answer-zone {
+      flex: 0 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .answer-btn {
+      height: clamp(92px, 22vh, 150px);
+      border-radius: 28px;
+      color: #fff;
+      font-size: clamp(54px, 18vw, 98px);
+      font-weight: 950;
+      line-height: 1;
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .answer-btn::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 12px;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      opacity: 0.8;
+    }
+
+    .answer-true {
+      background: linear-gradient(145deg, #2dbb8e, #157b62);
+    }
+
+    .answer-false {
+      background: linear-gradient(145deg, #f06573, #ba2436);
+    }
+
+    .answer-btn:disabled {
+      opacity: 0.52;
+      transform: none;
+    }
+
+    .result-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 10px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .stat {
+      border-radius: 18px;
+      background: #fff;
+      padding: 12px;
+      box-shadow: 0 8px 18px rgba(23, 32, 51, 0.08);
+    }
+
+    .stat small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 2px;
+      font-size: clamp(22px, 7vw, 36px);
+      line-height: 1;
+      font-weight: 950;
+    }
+
+    .wrong-box {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .box-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .box-head h2 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .ghost {
+      min-height: 34px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: #eef2f8;
+      color: #38445d;
+      font-weight: 900;
+      font-size: 12px;
+    }
+
+    .wrong-list {
+      min-height: 0;
+      flex: 1 1 auto;
+      overflow: auto;
+      display: grid;
+      gap: 7px;
+      padding-right: 2px;
+      overscroll-behavior: contain;
+    }
+
+    .wrong-item {
+      border-radius: 15px;
+      background: #fff;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      display: grid;
+      gap: 5px;
+    }
+
+    .wrong-item p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 800;
+    }
+
+    .wrong-item small {
+      color: var(--muted);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .empty {
+      height: 100%;
+      min-height: 108px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.72);
+      border-radius: 18px;
+      padding: 12px;
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: calc(16px + var(--safeBottom));
+      transform: translate(-50%, 12px);
+      width: calc(100% - 48px);
+      max-width: 560px;
+      border-radius: 999px;
+      padding: 12px 16px;
+      background: rgba(14, 21, 39, 0.92);
+      color: #fff;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      z-index: 20;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(8, 12, 24, 0.54);
+      display: none;
+      place-items: center;
+      padding: 18px;
+      z-index: 30;
+    }
+
+    .modal-backdrop.show {
+      display: grid;
+    }
+
+    .modal {
+      width: min(100%, 430px);
+      background: #fff;
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 12px;
+    }
+
+    .modal h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .modal p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-weight: 700;
+    }
+
+    @media (min-width: 760px) {
+      .app {
+        padding: 24px;
+      }
+
+      .phone {
+        border-radius: 38px;
+      }
+
+      .screen {
+        padding: 24px;
+      }
+
+      .mode-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .mode-card {
+        min-height: 106px;
+        align-content: start;
+      }
+
+      .answer-btn {
+        height: 132px;
+      }
+    }
+
+    @media (max-height: 680px) {
+      .screen {
+        padding: 12px;
+        gap: 8px;
+      }
+
+      .topbar {
+        height: 42px;
+      }
+
+      .home-mark {
+        width: min(29vw, 130px);
+        border-radius: 28px;
+      }
+
+      .panel {
+        padding: 12px;
+        border-radius: 20px;
+      }
+
+      .lead {
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .answer-btn {
+        height: clamp(76px, 20vh, 110px);
+        border-radius: 22px;
+      }
+
+      .feedback {
+        min-height: 46px;
+      }
+
+      .mode-card {
+        min-height: 58px;
+        padding: 9px;
+      }
+
+      .stat {
+        padding: 9px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-live="polite">
+    <div class="phone">
+      <section id="homeScreen" class="screen active">
+        <header class="topbar">
+          <div class="brand">
+            <div class="brand-title">歴史〇×クイズ</div>
+            <div class="brand-sub" id="homeSub">歴史の正誤判定をテンポよく演習</div>
+          </div>
+          <span class="status-chip" id="questionCountChip">10問</span>
+        </header>
+
+        <div class="hero">
+          <div class="panel home-card">
+            <div class="home-mark" aria-hidden="true">〇×</div>
+            <p class="lead">
+              問題文を読んで、正しいと思えば〇、誤りだと思えば×を選びます。<br />
+              進捗と間違えた問題はこの端末に保存されます。
+            </p>
+          </div>
+
+          <div class="panel">
+            <div class="stats-grid" id="homeStats"></div>
+          </div>
+
+          <div class="actions">
+            <button class="primary" id="goSetupBtn">クイズ開始</button>
+            <div class="mini-row">
+              <button class="secondary" id="goResultBtn">リザルト</button>
+              <label class="file-label">
+                CSV読込
+                <input type="file" id="csvInput" accept=".csv,text/csv" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="setupScreen" class="screen">
+        <header class="topbar">
+          <button class="icon-btn" data-nav="home">← ホーム</button>
+          <div class="brand">
+            <div class="brand-title">出題設定</div>
+            <div class="brand-sub">問題数と出題形式を選択</div>
+          </div>
+          <span class="status-chip" id="setupCountChip">10問</span>
+        </header>
+
+        <div class="panel setup-body">
+          <div class="field">
+            <span>出題する問題数</span>
+            <div class="number-row">
+              <button class="round-mini" id="minusCount">−</button>
+              <input id="quizCountInput" type="number" min="1" value="10" inputmode="numeric" />
+              <button class="round-mini" id="plusCount">＋</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <span>出題形式</span>
+          </div>
+
+          <div class="mode-grid" id="modeGrid">
+            <button class="mode-card selected" data-mode="random">
+              <strong>無作為に出題</strong>
+              <small>CSV内の全問題からランダムに選びます。</small>
+            </button>
+            <button class="mode-card" data-mode="skipCorrect">
+              <strong>正解済みをスキップ</strong>
+              <small>未演習・過去に間違えた問題を中心に出題します。</small>
+            </button>
+            <button class="mode-card" data-mode="skipWrong">
+              <strong>不正解済みをスキップ</strong>
+              <small>過去に間違えた問題を除外して出題します。</small>
+            </button>
+          </div>
+
+          <button class="primary" id="startQuizBtn">この設定で開始</button>
+        </div>
+      </section>
+
+      <section id="quizScreen" class="screen quiz-screen">
+        <header class="topbar">
+          <button class="icon-btn" id="quizHomeBtn">ホーム</button>
+          <div class="brand">
+            <div class="brand-title">歴史〇×クイズ</div>
+            <div class="brand-sub" id="quizSub">演習中</div>
+          </div>
+          <span class="status-chip" id="sessionScore">0 / 0</span>
+        </header>
+
+        <div class="quiz-stage">
+          <div class="quiz-meta">
+            <span id="quizPosition">1 / 10</span>
+            <div class="bar" aria-hidden="true"><i id="progressBar"></i></div>
+            <span id="modeLabel">ランダム</span>
+          </div>
+
+          <article class="panel question-card">
+            <p class="question-text" id="questionText">問題文</p>
+          </article>
+
+          <div class="feedback" id="feedback">
+            <div>
+              <strong id="feedbackTitle">正解</strong>
+              <small id="feedbackDetail">正答は〇です</small>
+            </div>
+            <button id="nextQuestionBtn">次へ</button>
+          </div>
+        </div>
+
+        <div class="answer-zone">
+          <button class="answer-btn answer-true" id="answerTrueBtn" data-label="TRUE">〇</button>
+          <button class="answer-btn answer-false" id="answerFalseBtn" data-label="FALSE">×</button>
+        </div>
+      </section>
+
+      <section id="resultScreen" class="screen">
+        <header class="topbar">
+          <button class="icon-btn" data-nav="home">← ホーム</button>
+          <div class="brand">
+            <div class="brand-title">リザルト</div>
+            <div class="brand-sub">進捗と間違えた問題の履歴</div>
+          </div>
+          <span class="status-chip" id="resultCountChip">10問</span>
+        </header>
+
+        <div class="panel result-body">
+          <div class="stats-grid" id="resultStats"></div>
+
+          <div class="mini-row">
+            <button class="secondary" id="exportWrongBtn">誤答CSVコピー</button>
+            <button class="danger" id="resetProgressBtn">進捗リセット</button>
+          </div>
+
+          <div class="wrong-box">
+            <div class="box-head">
+              <h2>過去に間違えた問題</h2>
+              <button class="ghost" id="clearWrongBtn">履歴だけ削除</button>
+            </div>
+            <div class="wrong-list" id="wrongList"></div>
+          </div>
+
+          <button class="primary" id="resultStartBtn">もう一度クイズ開始</button>
+        </div>
+      </section>
+
+      <div class="modal-backdrop" id="modalBackdrop">
+        <div class="modal">
+          <h2 id="modalTitle">確認</h2>
+          <p id="modalText">操作を続けますか？</p>
+          <div class="mini-row">
+            <button class="secondary" id="modalCancel">キャンセル</button>
+            <button class="danger" id="modalOk">実行</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast" id="toast"></div>
+    </div>
+  </main>
+
+  <script>
+    "use strict";
+
+    const DEFAULT_QUESTIONS = [{"text":"645年に始まった大化の改新では、中央集権的な国家づくりが進められた。","answer":true},{"text":"平安京への遷都は、桓武天皇の時代に行われた。","answer":true},{"text":"応仁の乱は、江戸時代に起こった全国的な内乱である。","answer":false},{"text":"関ヶ原の戦いは、1600年に起こった。","answer":true},{"text":"江戸幕府を開いたのは、豊臣秀吉である。","answer":false},{"text":"明治維新では、身分制度や政治制度などが大きく改められた。","answer":true},{"text":"大日本帝国憲法は、1889年に発布された。","answer":true},{"text":"日清戦争は、日露戦争より後に起こった。","answer":false},{"text":"フランス革命は、1789年に始まった。","answer":true},{"text":"第二次世界大戦は、1945年に終結した。","answer":true}];
+
+    const STORE_KEY = "rekishi_marubatsu_quiz_v1_progress";
+    const screens = {
+      home: document.getElementById("homeScreen"),
+      setup: document.getElementById("setupScreen"),
+      quiz: document.getElementById("quizScreen"),
+      result: document.getElementById("resultScreen")
+    };
+
+    const el = {
+      questionCountChip: document.getElementById("questionCountChip"),
+      setupCountChip: document.getElementById("setupCountChip"),
+      resultCountChip: document.getElementById("resultCountChip"),
+      homeStats: document.getElementById("homeStats"),
+      resultStats: document.getElementById("resultStats"),
+      goSetupBtn: document.getElementById("goSetupBtn"),
+      goResultBtn: document.getElementById("goResultBtn"),
+      resultStartBtn: document.getElementById("resultStartBtn"),
+      quizCountInput: document.getElementById("quizCountInput"),
+      minusCount: document.getElementById("minusCount"),
+      plusCount: document.getElementById("plusCount"),
+      modeGrid: document.getElementById("modeGrid"),
+      startQuizBtn: document.getElementById("startQuizBtn"),
+      questionText: document.getElementById("questionText"),
+      quizPosition: document.getElementById("quizPosition"),
+      progressBar: document.getElementById("progressBar"),
+      modeLabel: document.getElementById("modeLabel"),
+      quizSub: document.getElementById("quizSub"),
+      sessionScore: document.getElementById("sessionScore"),
+      answerTrueBtn: document.getElementById("answerTrueBtn"),
+      answerFalseBtn: document.getElementById("answerFalseBtn"),
+      feedback: document.getElementById("feedback"),
+      feedbackTitle: document.getElementById("feedbackTitle"),
+      feedbackDetail: document.getElementById("feedbackDetail"),
+      nextQuestionBtn: document.getElementById("nextQuestionBtn"),
+      wrongList: document.getElementById("wrongList"),
+      resetProgressBtn: document.getElementById("resetProgressBtn"),
+      clearWrongBtn: document.getElementById("clearWrongBtn"),
+      exportWrongBtn: document.getElementById("exportWrongBtn"),
+      quizHomeBtn: document.getElementById("quizHomeBtn"),
+      csvInput: document.getElementById("csvInput"),
+      toast: document.getElementById("toast"),
+      modalBackdrop: document.getElementById("modalBackdrop"),
+      modalTitle: document.getElementById("modalTitle"),
+      modalText: document.getElementById("modalText"),
+      modalCancel: document.getElementById("modalCancel"),
+      modalOk: document.getElementById("modalOk")
+    };
+
+    let questions = normalizeQuestions(DEFAULT_QUESTIONS);
+    let selectedMode = "random";
+    let activeScreen = "home";
+    let session = null;
+    let modalCallback = null;
+
+    function normalizeQuestions(list) {
+      return list
+        .map((q, index) => {
+          const text = String(q.text ?? q[0] ?? "").trim();
+          const answer = typeof q.answer === "boolean" ? q.answer : parseAnswer(q.answer ?? q[1]);
+          return {
+            id: makeQuestionId(text, answer, index),
+            text,
+            answer
+          };
+        })
+        .filter(q => q.text && typeof q.answer === "boolean");
+    }
+
+    function makeQuestionId(text, answer, index) {
+      let hash = 2166136261;
+      const source = `${text}|${answer ? "1" : "0"}`;
+      for (let i = 0; i < source.length; i++) {
+        hash ^= source.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return `q_${(hash >>> 0).toString(36)}_${index}`;
+    }
+
+    function parseAnswer(value) {
+      const s = String(value ?? "").trim().toLowerCase();
+      if (["true", "1", "yes", "y", "○", "〇", "丸", "まる", "o", "correct", "正", "正しい"].includes(s)) return true;
+      if (["false", "0", "no", "n", "×", "x", "✕", "誤", "誤り", "不正解", "incorrect"].includes(s)) return false;
+      return null;
+    }
+
+    function loadStore() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORE_KEY));
+        if (!parsed || typeof parsed !== "object") throw new Error("bad store");
+        return {
+          items: parsed.items && typeof parsed.items === "object" ? parsed.items : {},
+          wrongHistory: Array.isArray(parsed.wrongHistory) ? parsed.wrongHistory : []
+        };
+      } catch {
+        return { items: {}, wrongHistory: [] };
+      }
+    }
+
+    function saveStore(store) {
+      localStorage.setItem(STORE_KEY, JSON.stringify(store));
+    }
+
+    function getStat(store, q) {
+      if (!store.items[q.id]) {
+        store.items[q.id] = {
+          text: q.text,
+          answer: q.answer,
+          attempts: 0,
+          correct: 0,
+          wrong: 0,
+          correctOnce: false,
+          everWrong: false,
+          lastCorrect: null,
+          lastAt: null
+        };
+      }
+      return store.items[q.id];
+    }
+
+    function computeStats() {
+      const store = loadStore();
+      let attempted = 0;
+      let correctOnce = 0;
+      let totalAttempts = 0;
+      let totalCorrect = 0;
+      let totalWrong = 0;
+
+      for (const q of questions) {
+        const stat = store.items[q.id];
+        if (!stat) continue;
+        if (stat.attempts > 0) attempted++;
+        if (stat.correctOnce) correctOnce++;
+        totalAttempts += stat.attempts || 0;
+        totalCorrect += stat.correct || 0;
+        totalWrong += stat.wrong || 0;
+      }
+
+      return {
+        total: questions.length,
+        attempted,
+        correctOnce,
+        totalAttempts,
+        totalCorrect,
+        totalWrong,
+        progressPct: questions.length ? Math.round((attempted / questions.length) * 1000) / 10 : 0,
+        masteredPct: questions.length ? Math.round((correctOnce / questions.length) * 1000) / 10 : 0,
+        accuracyPct: totalAttempts ? Math.round((totalCorrect / totalAttempts) * 1000) / 10 : 0,
+        wrongHistory: store.wrongHistory || []
+      };
+    }
+
+    function updateAllCounts() {
+      const label = `${questions.length}問`;
+      el.questionCountChip.textContent = label;
+      el.setupCountChip.textContent = label;
+      el.resultCountChip.textContent = label;
+      el.quizCountInput.max = String(Math.max(1, questions.length));
+      if (Number(el.quizCountInput.value) > questions.length) {
+        el.quizCountInput.value = String(questions.length);
+      }
+      renderHomeStats();
+    }
+
+    function statCard(label, value, suffix = "") {
+      return `<div class="stat"><small>${escapeHTML(label)}</small><strong>${escapeHTML(value)}${suffix}</strong></div>`;
+    }
+
+    function renderHomeStats() {
+      const s = computeStats();
+      el.homeStats.innerHTML =
+        statCard("演習済み", `${s.progressPct}`, "%") +
+        statCard("正解済み", `${s.masteredPct}`, "%");
+    }
+
+    function renderResult() {
+      const s = computeStats();
+      el.resultStats.innerHTML =
+        statCard("演習済み", `${s.progressPct}`, "%") +
+        statCard("正解済み", `${s.masteredPct}`, "%") +
+        statCard("解答正答率", `${s.accuracyPct}`, "%") +
+        statCard("誤答回数", `${s.totalWrong}`, "回");
+
+      const history = s.wrongHistory.filter(item => questions.some(q => q.id === item.id));
+      if (history.length === 0) {
+        el.wrongList.innerHTML = `<div class="empty">まだ間違えた問題はありません。</div>`;
+        return;
+      }
+
+      el.wrongList.innerHTML = history.slice(0, 80).map(item => `
+        <div class="wrong-item">
+          <p>${escapeHTML(item.text)}</p>
+          <small>${escapeHTML(item.at)}　あなたの答え：${escapeHTML(item.answered)}／正答：${escapeHTML(item.correctAnswer)}</small>
+        </div>
+      `).join("");
+    }
+
+    function showScreen(name) {
+      activeScreen = name;
+      Object.entries(screens).forEach(([key, node]) => {
+        node.classList.toggle("active", key === name);
+      });
+      if (name === "home") renderHomeStats();
+      if (name === "result") renderResult();
+      if (name === "setup") {
+        const s = computeStats();
+        el.setupCountChip.textContent = `${questions.length}問`;
+        if (!el.quizCountInput.value || Number(el.quizCountInput.value) < 1) el.quizCountInput.value = "10";
+        const defaultCount = Math.min(10, Math.max(1, questions.length));
+        if (Number(el.quizCountInput.value) > questions.length) el.quizCountInput.value = String(defaultCount);
+      }
+    }
+
+    function clampQuizCount() {
+      const max = Math.max(1, questions.length);
+      let n = Number(el.quizCountInput.value);
+      if (!Number.isFinite(n)) n = 1;
+      n = Math.round(n);
+      n = Math.min(max, Math.max(1, n));
+      el.quizCountInput.value = String(n);
+      return n;
+    }
+
+    function buildCandidates(mode) {
+      const store = loadStore();
+      if (mode === "skipCorrect") {
+        return questions.filter(q => {
+          const stat = store.items[q.id];
+          return !(stat && stat.correctOnce);
+        });
+      }
+      if (mode === "skipWrong") {
+        return questions.filter(q => {
+          const stat = store.items[q.id];
+          return !(stat && stat.everWrong);
+        });
+      }
+      return questions.slice();
+    }
+
+    function startQuiz() {
+      if (!questions.length) {
+        showToast("問題を読み込めませんでした。CSVを確認してください。");
+        return;
+      }
+
+      const count = clampQuizCount();
+      let candidates = buildCandidates(selectedMode);
+      if (candidates.length === 0) {
+        candidates = questions.slice();
+        showToast("条件に合う問題がないため、全問題から出題します。");
+      }
+
+      const picked = shuffle(candidates).slice(0, Math.min(count, candidates.length));
+      session = {
+        questions: picked,
+        index: 0,
+        correct: 0,
+        answered: 0,
+        mode: selectedMode,
+        locked: false,
+        finished: false
+      };
+
+      showScreen("quiz");
+      renderCurrentQuestion();
+    }
+
+    function renderCurrentQuestion() {
+      if (!session || session.finished) return;
+      const q = session.questions[session.index];
+      const total = session.questions.length;
+      el.questionText.textContent = q.text;
+      el.questionText.classList.toggle("long", q.text.length > 55);
+      el.questionText.classList.toggle("very-long", q.text.length > 92);
+      el.quizPosition.textContent = `${session.index + 1} / ${total}`;
+      el.progressBar.style.width = `${Math.round((session.index / total) * 100)}%`;
+      el.sessionScore.textContent = `${session.correct} / ${session.answered}`;
+      el.modeLabel.textContent = modeName(session.mode);
+      el.quizSub.textContent = `正答率 ${session.answered ? Math.round((session.correct / session.answered) * 100) : 0}%`;
+      session.locked = false;
+      setAnswerLocked(false);
+      el.feedback.classList.remove("show");
+    }
+
+    function answerCurrent(userAnswer) {
+      if (!session || session.locked || session.finished) return;
+      const q = session.questions[session.index];
+      const isCorrect = userAnswer === q.answer;
+      session.locked = true;
+      session.answered++;
+      if (isCorrect) session.correct++;
+
+      const store = loadStore();
+      const stat = getStat(store, q);
+      stat.attempts += 1;
+      stat.lastCorrect = isCorrect;
+      stat.lastAt = new Date().toISOString();
+      if (isCorrect) {
+        stat.correct += 1;
+        stat.correctOnce = true;
+      } else {
+        stat.wrong += 1;
+        stat.everWrong = true;
+        store.wrongHistory.unshift({
+          id: q.id,
+          text: q.text,
+          answered: userAnswer ? "○" : "×",
+          correctAnswer: q.answer ? "○" : "×",
+          at: new Date().toLocaleString("ja-JP", {
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
+          })
+        });
+        store.wrongHistory = store.wrongHistory.slice(0, 250);
+      }
+      saveStore(store);
+
+      el.feedbackTitle.textContent = isCorrect ? "正解！" : "不正解";
+      el.feedbackDetail.textContent = `正答は${q.answer ? "〇" : "×"}です`;
+      el.feedback.classList.add("show");
+      el.sessionScore.textContent = `${session.correct} / ${session.answered}`;
+      el.quizSub.textContent = `正答率 ${Math.round((session.correct / session.answered) * 100)}%`;
+      setAnswerLocked(true);
+      if (session.index + 1 === session.questions.length) {
+        el.nextQuestionBtn.textContent = "結果へ";
+      } else {
+        el.nextQuestionBtn.textContent = "次へ";
+      }
+    }
+
+    function nextQuestion() {
+      if (!session || !session.locked) return;
+      if (session.index + 1 >= session.questions.length) {
+        finishQuiz();
+        return;
+      }
+      session.index++;
+      renderCurrentQuestion();
+    }
+
+    function finishQuiz() {
+      if (!session) return;
+      session.finished = true;
+      el.progressBar.style.width = "100%";
+      const rate = session.answered ? Math.round((session.correct / session.answered) * 100) : 0;
+      showToast(`今回の結果：${session.correct} / ${session.answered}（${rate}%）`);
+      session = null;
+      showScreen("result");
+    }
+
+    function setAnswerLocked(locked) {
+      el.answerTrueBtn.disabled = locked;
+      el.answerFalseBtn.disabled = locked;
+    }
+
+    function modeName(mode) {
+      return {
+        random: "ランダム",
+        skipCorrect: "正解済みスキップ",
+        skipWrong: "不正解済みスキップ"
+      }[mode] || "ランダム";
+    }
+
+    function shuffle(array) {
+      const a = array.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const next = text[i + 1];
+
+        if (c === '"') {
+          if (inQuotes && next === '"') {
+            cell += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (c === "," && !inQuotes) {
+          row.push(cell);
+          cell = "";
+        } else if ((c === "\n" || c === "\r") && !inQuotes) {
+          if (c === "\r" && next === "\n") i++;
+          row.push(cell);
+          if (row.some(v => String(v).trim() !== "")) rows.push(row);
+          row = [];
+          cell = "";
+        } else {
+          cell += c;
+        }
+      }
+
+      row.push(cell);
+      if (row.some(v => String(v).trim() !== "")) rows.push(row);
+      return rows;
+    }
+
+    function loadCSVFile(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const rows = parseCSV(String(reader.result || ""));
+        const parsed = [];
+
+        rows.forEach((row, index) => {
+          if (row.length < 2) return;
+          const answer = parseAnswer(row[1]);
+          if (answer === null) return;
+          parsed.push({
+            text: String(row[0]).trim(),
+            answer
+          });
+        });
+
+        const normalized = normalizeQuestions(parsed);
+        if (!normalized.length) {
+          showToast("CSVを読み込めませんでした。1列目=問題文、2列目=True/Falseで作成してください。");
+          return;
+        }
+
+        questions = normalized;
+        updateAllCounts();
+        showToast(`${questions.length}問のCSVを読み込みました。`);
+      };
+      reader.readAsText(file, "utf-8");
+    }
+
+    function resetProgress() {
+      localStorage.removeItem(STORE_KEY);
+      renderHomeStats();
+      renderResult();
+      showToast("進捗をリセットしました。");
+    }
+
+    function clearWrongHistory() {
+      const store = loadStore();
+      store.wrongHistory = [];
+      Object.values(store.items).forEach(stat => {
+        stat.everWrong = false;
+        stat.wrong = 0;
+      });
+      saveStore(store);
+      renderResult();
+      renderHomeStats();
+      showToast("誤答履歴を削除しました。");
+    }
+
+    async function copyWrongCSV() {
+      const store = loadStore();
+      const history = (store.wrongHistory || []).filter(item => questions.some(q => q.id === item.id));
+      if (!history.length) {
+        showToast("コピーできる誤答履歴がありません。");
+        return;
+      }
+
+      const header = ["日時", "問題文", "あなたの答え", "正答"];
+      const lines = [header, ...history.map(item => [item.at, item.text, item.answered, item.correctAnswer])]
+        .map(row => row.map(csvEscape).join(","))
+        .join("\n");
+
+      try {
+        await navigator.clipboard.writeText(lines);
+        showToast("誤答履歴CSVをコピーしました。");
+      } catch {
+        showToast("コピーに失敗しました。ブラウザの権限を確認してください。");
+      }
+    }
+
+    function csvEscape(value) {
+      const s = String(value ?? "");
+      return /[",\n\r]/.test(s) ? `"${s.replaceAll('"', '""')}"` : s;
+    }
+
+    function showToast(message) {
+      el.toast.textContent = message;
+      el.toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => el.toast.classList.remove("show"), 2100);
+    }
+
+    function confirmModal(title, text, onOk) {
+      el.modalTitle.textContent = title;
+      el.modalText.textContent = text;
+      modalCallback = onOk;
+      el.modalBackdrop.classList.add("show");
+    }
+
+    function closeModal() {
+      el.modalBackdrop.classList.remove("show");
+      modalCallback = null;
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    el.goSetupBtn.addEventListener("click", () => showScreen("setup"));
+    el.goResultBtn.addEventListener("click", () => showScreen("result"));
+    el.resultStartBtn.addEventListener("click", () => showScreen("setup"));
+
+    document.querySelectorAll("[data-nav='home']").forEach(btn => {
+      btn.addEventListener("click", () => showScreen("home"));
+    });
+
+    el.quizHomeBtn.addEventListener("click", () => {
+      if (session && !session.finished) {
+        confirmModal(
+          "ホームに戻りますか？",
+          "未回答の残り問題はリザルトに記録されません。すでに答えた問題だけ保存されます。",
+          () => {
+            session = null;
+            showScreen("home");
+            showToast("ホームに戻りました。");
+          }
+        );
+      } else {
+        showScreen("home");
+      }
+    });
+
+    el.minusCount.addEventListener("click", () => {
+      el.quizCountInput.value = String(Math.max(1, clampQuizCount() - 1));
+    });
+
+    el.plusCount.addEventListener("click", () => {
+      el.quizCountInput.value = String(Math.min(questions.length, clampQuizCount() + 1));
+    });
+
+    el.quizCountInput.addEventListener("change", clampQuizCount);
+    el.quizCountInput.addEventListener("blur", clampQuizCount);
+
+    el.modeGrid.addEventListener("click", (event) => {
+      const card = event.target.closest(".mode-card");
+      if (!card) return;
+      selectedMode = card.dataset.mode;
+      document.querySelectorAll(".mode-card").forEach(node => node.classList.toggle("selected", node === card));
+    });
+
+    el.startQuizBtn.addEventListener("click", startQuiz);
+    el.answerTrueBtn.addEventListener("click", () => answerCurrent(true));
+    el.answerFalseBtn.addEventListener("click", () => answerCurrent(false));
+    el.nextQuestionBtn.addEventListener("click", nextQuestion);
+
+    el.resetProgressBtn.addEventListener("click", () => {
+      confirmModal(
+        "進捗をリセットしますか？",
+        "演習済み割合、正解済み割合、誤答履歴をすべて削除します。",
+        resetProgress
+      );
+    });
+
+    el.clearWrongBtn.addEventListener("click", () => {
+      confirmModal(
+        "誤答履歴を削除しますか？",
+        "進捗のうち、誤答履歴と不正解済み情報だけを削除します。",
+        clearWrongHistory
+      );
+    });
+
+    el.exportWrongBtn.addEventListener("click", copyWrongCSV);
+
+    el.csvInput.addEventListener("change", (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (file) loadCSVFile(file);
+      event.target.value = "";
+    });
+
+    el.modalCancel.addEventListener("click", closeModal);
+    el.modalBackdrop.addEventListener("click", (event) => {
+      if (event.target === el.modalBackdrop) closeModal();
+    });
+    el.modalOk.addEventListener("click", () => {
+      const cb = modalCallback;
+      closeModal();
+      if (typeof cb === "function") cb();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (activeScreen !== "quiz" || !session) return;
+      if (event.key === "ArrowLeft" || event.key === "o" || event.key === "O") answerCurrent(true);
+      if (event.key === "ArrowRight" || event.key === "x" || event.key === "X") answerCurrent(false);
+      if (event.key === "Enter" && session.locked) nextQuestion();
+    });
+
+    updateAllCounts();
+  </script>
+</body>
+</html>
